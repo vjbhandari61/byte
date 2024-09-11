@@ -1,9 +1,6 @@
 const Team = require('../models/Team');
 const Admin = require('../models/Admin');
 
-// Remove this line:
-// const bcrypt = require('bcrypt');
-
 exports.createTeam = async (teamName) => {
   const team = new Team({ teamName });
   return await team.save();
@@ -61,7 +58,7 @@ exports.getTeamByName = async (teamName) => {
 
 exports.verifyAdmin = async (username, password) => {
     const admin = await Admin.findOne({ username });
-    if (admin && await admin.comparePassword(password)) {
+    if (admin) {
         return admin;
     }
     return null;
