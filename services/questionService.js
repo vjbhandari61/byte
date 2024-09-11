@@ -99,14 +99,14 @@ exports.runCodeAndCheckTestCases = async (code, language, testCases) => {
   return { allTestsPassed, testResults };
 };
 
-exports.runCodeWithPiston = async (code, language, input) => {
+const runCodeWithPiston = async (code, language, input) => {
   const pistonUrl = 'https://emkc.org/api/v2/piston/execute';
   const languageVersions = {
     'python': '3.10.0',
-    'javascript': '18.15.0',
-    'java': '15.0.2',
     'c': '10.2.0',
-    'cpp': '10.2.0'
+    'cpp': '10.2.0',
+    'java': '15.0.2',
+    'javascript': '18.15.0'
   };
 
   const pistonLanguage = language.toLowerCase();
@@ -118,7 +118,7 @@ exports.runCodeWithPiston = async (code, language, input) => {
       version: languageVersions[pistonLanguage],
       files: [
         {
-          name: `main.${pistonLanguage === 'python' ? 'py' : pistonLanguage === 'javascript' ? 'js' : pistonLanguage}`,
+          name: `main.${getFileExtension(pistonLanguage)}`,
           content: code
         }
       ],
