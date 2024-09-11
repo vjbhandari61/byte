@@ -23,6 +23,7 @@ exports.getQuestionsByDomain = async (domain) => {
 exports.checkAnswer = async (questionId, submittedAnswer) => {
   try {
     const question = await Question.findById(questionId);
+    console.log("QUestion", question)
     if (!question) {
       console.log(`Question not found for ID: ${questionId}`);
       return false;

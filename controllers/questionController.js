@@ -18,16 +18,17 @@ exports.getQuestionsByRound = async (req, res) => {
 exports.submitAnswers = async (req, res) => {
   try {
     if (!req.body || !req.body.teamName || !Array.isArray(req.body.answers) || !req.body.round) {
+      console.log("SOmething went wrong")
       return res.status(400).json({ message: "Invalid request body format" });
     }
 
     let score = 0;
     let correctAnswers = [];
     for (let answer of req.body.answers) {
-      if (!answer.questionId || !answer.answer) {
+      if (!answer.questionId || !answer.choice) {
         return res.status(400).json({ message: "Invalid answer format" });
       }
-      const isCorrect = await questionService.checkAnswer(answer.questionId, answer.answer);
+      const isCorrect = await questionService.checkAnswer(answer.questionId, answer.choice);
       if (isCorrect) {
         score++;
         correctAnswers.push(answer.questionId);
@@ -69,8 +70,10 @@ exports.getQuestionByDomain = async (req, res) => {
 exports.submitCode = async (req, res) => {
   try {
     const { teamName, questionId, code, language } = req.body;
-
+    
     if (!teamName || !questionId || !code || !language) {
+      // console.log("Something Went Wrong!")
+      console.log("teamName",teamName,"questionId ",questionId,"code",code,"language",language);
       return res.status(400).json({ message: "Invalid request body format" });
     }
 
