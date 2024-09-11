@@ -34,7 +34,7 @@ exports.submitAnswers = async (req, res) => {
       }
     }
 
-    const updatedTeam = await teamService.updateScore(req.body.teamName, score, req.body.round);
+    const updatedTeam = await teamService.updateScore(req.body.teamName, score);
 
     if (!updatedTeam) {
       return res.status(404).json({ message: "Team not found" });

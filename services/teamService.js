@@ -46,7 +46,7 @@ exports.getAllTeams = async () => {
 
 exports.updateScore = async (teamName, scoreIncrement) => {
   return await Team.findOneAndUpdate(
-    { name: teamName },
+    { teamName: teamName },
     { $inc: { score: scoreIncrement } },
     { new: true }
   );
