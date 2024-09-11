@@ -147,71 +147,69 @@ function getFileExtension(language) {
   }
 }
 
-async function runCode(filePath, language, input) {
-  const commands = {
-    c: [`gcc`, [`${filePath}.c`, `-o`, `${filePath}.out`], `${filePath}.out`],
-    cpp: [`g++`, [`${filePath}.cpp`, `-o`, `${filePath}.out`], `${filePath}.out`],
-    java: [`javac`, [`${filePath}.java`], `java`, [`-cp`, path.dirname(filePath), path.basename(filePath)]],
-    python: [`python`, [`${filePath}.py`]],
-    javascript: [`node`, [`${filePath}.js`]]
-  };
+// async function runCode(filePath, language, input) {
+//   const commands = {
+//     c: [`gcc`, [`${filePath}.c`, `-o`, `${filePath}.out`], `${filePath}.out`],
+//     cpp: [`g++`, [`${filePath}.cpp`, `-o`, `${filePath}.out`], `${filePath}.out`],
+//     java: [`javac`, [`${filePath}.java`], `java`, [`-cp`, path.dirname(filePath), path.basename(filePath)]],
+//     python: [`python`, [`${filePath}.py`]],
+//     javascript: [`node`, [`${filePath}.js`]]
+//   };
 
-  const [compiler, compilerArgs, runner, runnerArgs] = commands[language.toLowerCase()];
-  if (!compiler) throw new Error('Unsupported language');
+//   const [compiler, compilerArgs, runner, runnerArgs] = commands[language.toLowerCase()];
+//   if (!compiler) throw new Error('Unsupported language');
 
-  console.log(`Compiling with command: ${compiler} ${compilerArgs.join(' ')}`);
+//   console.log(`Compiling with command: ${compiler} ${compilerArgs.join(' ')}`);
 
-  return new Promise((resolve, reject) => {
-    let output = '';
-    let errorOutput = '';
+//   return new Promise((resolve, reject) => {
+//     let output = '';
+//     let errorOutput = '';
 
-    const compile = spawn(compiler, compilerArgs);
+//     const compile = spawn(compiler, compilerArgs);
 
-    compile.stdout.on('data', (data) => {
-      console.log(`Compile stdout: ${data}`);
-    });
+//     compile.stdout.on('data', (data) => {
+//       console.log(`Compile stdout: ${data}`);
+//     });
 
-    compile.stderr.on('data', (data) => {
-      console.error(`Compile stderr: ${data}`);
-      errorOutput += data;
-    });
+//     compile.stderr.on('data', (data) => {
+//       console.error(`Compile stderr: ${data}`);
+//       errorOutput += data;
+//     });
 
-    compile.on('close', (code) => {
-      if (code !== 0) {
-        console.error(`Compilation failed with code ${code}`);
-        return reject(new Error(`Compilation failed: ${errorOutput}`));
-      }
+//     compile.on('close', (code) => {
+//       if (code !== 0) {
+//         console.error(`Compilation failed with code ${code}`);
+//         return reject(new Error(`Compilation failed: ${errorOutput}`));
+//       }
 
-      console.log(`Running with command: ${runner || compiler} ${(runnerArgs || compilerArgs).join(' ')}`);
+//       console.log(`Running with command: ${runner || compiler} ${(runnerArgs || compilerArgs).join(' ')}`);
 
-      const run = spawn(runner || compiler, runnerArgs || compilerArgs);
+//       const run = spawn(runner || compiler, runnerArgs || compilerArgs);
 
-      run.stdin.write(input);
-      run.stdin.end();
+//       run.stdin.write(input);
+//       run.stdin.end();
 
-      run.stdout.on('data', (data) => {
-        console.log(`Run stdout: ${data}`);
-        output += data;
-      });
+//       run.stdout.on('data', (data) => {
+//         console.log(`Run stdout: ${data}`);
+//         output += data;
+//       });
 
-      run.stderr.on('data', (data) => {
-        console.error(`Run stderr: ${data}`);
-        errorOutput += data;
-      });
+//       run.stderr.on('data', (data) => {
+//         console.error(`Run stderr: ${data}`);
+//         errorOutput += data;
+//       });
 
-      run.on('close', (code) => {
-        if (code !== 0) {
-          console.error(`Execution failed with code ${code}`);
-          reject(new Error(`Execution failed: ${errorOutput}`));
-        } else {
-          resolve(output);
-        }
-      });
-    });
-  });
-}
-
-
+//       run.on('close', (code) => {
+//         if (code !== 0) {
+//           console.error(`Execution failed with code ${code}`);
+//           reject(new Error(`Execution failed: ${errorOutput}`));
+//         } else {
+//           resolve(output);
+//         }
+//       });
+//     });
+//   });
+// }
 
 exports.getAllQuestionsRound1 = async () => {
   return await Question.find({ round: 1 });
