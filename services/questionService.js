@@ -2,6 +2,7 @@ const Question = require('../models/Question');
 const { exec, spawn } = require('child_process');
 const fs = require('fs').promises;
 const path = require('path');
+const axios = require('axios');
 
 // You might need to install and import a code execution library
 // For example: const { runCode } = require('some-code-execution-library');
