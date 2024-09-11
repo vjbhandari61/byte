@@ -117,37 +117,6 @@ exports.submitCode = async (req, res) => {
   }
 };
 
-async function runCodeWithPiston(code, language, input) {
-  const pistonUrl = 'https://emkc.org/api/v2/piston/execute';
-  const languageMapping = {
-    'python': 'python3',
-    'javascript': 'node',
-    'java': 'java',
-    'c': 'gcc',
-    'cpp': 'g++'
-  };
-
-  const pistonLanguage = languageMapping[language.toLowerCase()];
-  if (!pistonLanguage) throw new Error('Unsupported language');
-
-  try {
-    const response = await axios.post(pistonUrl, {
-      language: pistonLanguage,
-      source_code: code,
-      stdin: input
-    });
-
-    if (response.data && response.data.run) {
-      return response.data.run.output;
-    } else {
-      throw new Error('Invalid response from Piston API');
-    }
-  } catch (error) {
-    console.error("Error calling Piston API:", error);
-    throw new Error('Failed to execute code with Piston API');
-  }
-}
-
 exports.getAllQuestionsRound1 = async (req, res) => {
   try {
     const questions = await questionService.getAllQuestionsRound1();

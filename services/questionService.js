@@ -12,7 +12,7 @@ exports.getQuestionsByRound = async (round) => {
 
 exports.getQuestionById = async (questionId) => {
   return await Question.findById(questionId);
-};  
+};
 
 exports.getQuestionsByDomain = async (domain) => {
   const questions = await Question.find({ domain });
@@ -26,26 +26,26 @@ exports.checkAnswer = async (questionId, submittedAnswer) => {
       console.log(`Question not found for ID: ${questionId}`);
       return false;
     }
-    
+
     console.log(`Checking answer for question ${questionId}`);
     console.log(`Question object:`, question);
-    
+
     if (!question.correctAnswer) {
       console.log(`Correct answer is undefined for question ${questionId}`);
       return false;
     }
-    
+
     console.log(`Correct answer: "${question.correctAnswer}"`);
     console.log(`Submitted answer: "${submittedAnswer}"`);
-    
+
     // Ensure both answers are strings and trim whitespace
     const correctAnswerStr = String(question.correctAnswer).trim().toLowerCase();
     const submittedAnswerStr = String(submittedAnswer).trim().toLowerCase();
-    
+
     const isCorrect = correctAnswerStr === submittedAnswerStr;
-    
+
     console.log(`Is correct: ${isCorrect}`);
-    
+
     return isCorrect;
   } catch (error) {
     console.error('Error checking answer:', error);
@@ -61,67 +61,73 @@ exports.runCodeAndCheckTestCases = async (code, language, testCases) => {
   let allTestsPassed = true;
   const testResults = [];
 
-  const tempDir = path.join(__dirname, '../temp');
-  await fs.mkdir(tempDir, { recursive: true });
-  const fileName = `temp_${Date.now()}`;
-  const filePath = path.join(tempDir, fileName);
+  for (const [index, testCase] of testCases.entries()) {
+    try {
+      console.log(`Running test case ${index + 1}`);
+      const output = await runCodeWithPiston(code, language, testCase.input);
+      console.log(`Output: ${output}`);
 
-  try {
-    await fs.writeFile(`${filePath}.${getFileExtension(language)}`, code);
-    console.log(`Code file created: ${filePath}.${getFileExtension(language)}`);
+      // Safely handle potentially undefined output
+      const trimmedOutput = (output || '').toString().trim();
+      const trimmedExpected = (testCase.expectedOutput || '').toString().trim();
 
-    for (const [index, testCase] of testCases.entries()) {
-      try {
-        console.log(`Running test case ${index + 1}`);
-        const output = await runCode(filePath, language, testCase.input);
-        console.log(`Output: ${output}`);
-        
-        // Safely handle potentially undefined output
-        const trimmedOutput = (output || '').toString().trim();
-        const trimmedExpected = (testCase.expectedOutput || '').toString().trim();
-        
-        // Convert to numbers for comparison if they're numeric
-        const numericOutput = !isNaN(trimmedOutput) ? Number(trimmedOutput) : trimmedOutput;
-        const numericExpected = !isNaN(trimmedExpected) ? Number(trimmedExpected) : trimmedExpected;
-        
-        const passed = numericOutput === numericExpected;
-        
-        console.log(`Test case ${index + 1} result: ${passed ? 'Passed' : 'Failed'}`);
-        testResults.push({ 
-          input: testCase.input, 
-          expected: trimmedExpected,
-          actual: trimmedOutput, 
-          passed 
-        });
+      const passed = trimmedOutput === trimmedExpected;
 
-        if (!passed) allTestsPassed = false;
-      } catch (error) {
-        console.error(`Error running test case ${index + 1}:`, error);
-        allTestsPassed = false;
-        testResults.push({ 
-          input: testCase.input, 
-          expected: testCase.expectedOutput,
-          actual: "Error: " + error.message, 
-          passed: false 
-        });
-      }
-    }
-  } finally {
-    // Clean up temporary files
-    const extensions = ['.c', '.cpp', '.java', '.py', '.js', '.class', '.out'];
-    for (const ext of extensions) {
-      try {
-        await fs.unlink(`${filePath}${ext}`);
-        console.log(`Deleted temporary file: ${filePath}${ext}`);
-      } catch (error) {
-        // Ignore errors if file doesn't exist
-      }
+      console.log(`Test case ${index + 1} result: ${passed ? 'Passed' : 'Failed'}`);
+      testResults.push({
+        input: testCase.input,
+        expected: trimmedExpected,
+        actual: trimmedOutput,
+        passed
+      });
+
+      if (!passed) allTestsPassed = false;
+    } catch (error) {
+      console.error(`Error running test case ${index + 1}:`, error);
+      allTestsPassed = false;
+      testResults.push({
+        input: testCase.input,
+        expected: testCase.expectedOutput,
+        actual: "Error: " + error.message,
+        passed: false
+      });
     }
   }
 
   console.log(`All tests passed: ${allTestsPassed}`);
   return { allTestsPassed, testResults };
 };
+
+async function runCodeWithPiston(code, language, input) {
+  const pistonUrl = 'https://emkc.org/api/v2/piston/execute';
+  const languageMapping = {
+    'python': 'python3',
+    'javascript': 'node',
+    'java': 'java',
+    'c': 'gcc',
+    'cpp': 'g++'
+  };
+
+  const pistonLanguage = languageMapping[language.toLowerCase()];
+  if (!pistonLanguage) throw new Error('Unsupported language');
+
+  try {
+    const response = await axios.post(pistonUrl, {
+      language: pistonLanguage,
+      source_code: code,
+      stdin: input
+    });
+
+    if (response.data && response.data.run) {
+      return response.data.run.output;
+    } else {
+      throw new Error('Invalid response from Piston API');
+    }
+  } catch (error) {
+    console.error("Error calling Piston API:", error);
+    throw new Error('Failed to execute code with Piston API');
+  }
+}
 
 function getFileExtension(language) {
   switch (language.toLowerCase()) {
@@ -197,6 +203,8 @@ async function runCode(filePath, language, input) {
     });
   });
 }
+
+
 
 exports.getAllQuestionsRound1 = async () => {
   return await Question.find({ round: 1 });
