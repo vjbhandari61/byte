@@ -68,9 +68,9 @@ exports.runCodeAndCheckTestCases = async (code, language, testCases) => {
       const output = await runCodeWithPiston(code, language, testCase.input);
       console.log(`Output: ${output}`);
 
-      // Safely handle potentially undefined output
+      // Safely handle potentially undefined output and expected output
       const trimmedOutput = (output || '').toString().trim();
-      const trimmedExpected = (testCase.expectedOutput || '').toString().trim();
+      const trimmedExpected = (testCase.output || '').toString().trim();
 
       const passed = trimmedOutput === trimmedExpected;
 
@@ -88,7 +88,7 @@ exports.runCodeAndCheckTestCases = async (code, language, testCases) => {
       allTestsPassed = false;
       testResults.push({
         input: testCase.input,
-        expected: testCase.expectedOutput,
+        expected: (testCase.output || '').toString().trim(),
         actual: "Error: " + error.message,
         passed: false
       });
