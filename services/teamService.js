@@ -12,7 +12,7 @@ exports.createTeam = async (teamName) => {
 };
 
 exports.getAllTeams = async () => {
-  return await Team.find();
+  return await Team.find().sort({ score: -1 });
 };
 
 // exports.updateScore = async (teamName, newScore, round) => {
