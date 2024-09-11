@@ -76,16 +76,21 @@ exports.runCodeAndCheckTestCases = async (code, language, testCases) => {
         const output = await runCode(filePath, language, testCase.input);
         console.log(`Output: ${output}`);
         
-        // Convert both output and expected output to numbers and compare
-        const numericOutput = Number((output || '').toString().trim());
-        const numericExpected = Number(testCase.expectedOutput.trim());
-        const passed = !isNaN(numericOutput) && !isNaN(numericExpected) && numericOutput === numericExpected;
+        // Safely handle potentially undefined output
+        const trimmedOutput = (output || '').toString().trim();
+        const trimmedExpected = (testCase.expectedOutput || '').toString().trim();
+        
+        // Convert to numbers for comparison if they're numeric
+        const numericOutput = !isNaN(trimmedOutput) ? Number(trimmedOutput) : trimmedOutput;
+        const numericExpected = !isNaN(trimmedExpected) ? Number(trimmedExpected) : trimmedExpected;
+        
+        const passed = numericOutput === numericExpected;
         
         console.log(`Test case ${index + 1} result: ${passed ? 'Passed' : 'Failed'}`);
         testResults.push({ 
           input: testCase.input, 
-          expected: testCase.output,
-          actual: output.trim(), 
+          expected: trimmedExpected,
+          actual: trimmedOutput, 
           passed 
         });
 
@@ -95,7 +100,7 @@ exports.runCodeAndCheckTestCases = async (code, language, testCases) => {
         allTestsPassed = false;
         testResults.push({ 
           input: testCase.input, 
-          expected: testCase.output,
+          expected: testCase.expectedOutput,
           actual: "Error: " + error.message, 
           passed: false 
         });
