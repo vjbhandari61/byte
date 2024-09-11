@@ -12,32 +12,45 @@ exports.getAllTeams = async () => {
   return await Team.find();
 };
 
-exports.updateScore = async (teamName, newScore, round) => {
-  try {
-    const team = await Team.findOne({ teamName });
-    if (!team) {
-      throw new Error('Team not found');
-    }
+// exports.updateScore = async (teamName, newScore, round) => {
+//   try {
+//     const team = await Team.findOne({ teamName });
+//     if (!team) {
+//       throw new Error('Team not found');
+//     }
     
-    console.log(`Updating score for team ${teamName}, round ${round}. Current score: ${team.score}, New score to add: ${newScore}`);
+//     console.log(`Updating score for team ${teamName}, round ${round}. Current score: ${team.score}, New score to add: ${newScore}`);
     
-    // You might want to store round-specific scores separately
-    if (!team.roundScores) {
-      team.roundScores = {};
-    }
-    team.roundScores[round] = (team.roundScores[round] || 0) + newScore;
+//     // You might want to store round-specific scores separately
+//     if (!team.roundScores) {
+//       team.roundScores = {};
+//     }
+//     team.roundScores[round] = (team.roundScores[round] || 0) + newScore;
     
-    team.score += newScore;
+//     team.score += newScore;
     
-    console.log(`Updated total score: ${team.score}, Round ${round} score: ${team.roundScores[round]}`);
+//     console.log(`Updated total score: ${team.score}, Round ${round} score: ${team.roundScores[round]}`);
     
-    await team.save();
+//     await team.save();
     
-    return team;
-  } catch (error) {
-    console.error('Error updating team score:', error);
-    throw error;
-  }
+//     return team;
+//   } catch (error) {
+//     console.error('Error updating team score:', error);
+//     throw error;
+//   }
+// };
+
+
+exports.updateScore = async (teamName, scoreIncrement) => {
+  return await Team.findOneAndUpdate(
+    { name: teamName },
+    { $inc: { score: scoreIncrement } },
+    { new: true }
+  );
+};
+
+exports.getTeamByName = async (teamName) => {
+  return await Team.findOne({ name: teamName });
 };
 
 // Add this new function

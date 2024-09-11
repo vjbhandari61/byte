@@ -10,6 +10,10 @@ exports.getQuestionsByRound = async (round) => {
   return await Question.find({ round });
 };
 
+exports.getQuestionById = async (questionId) => {
+  return await Question.findById(questionId);
+};  
+
 exports.getQuestionsByDomain = async (domain) => {
   const questions = await Question.find({ domain });
   return questions[Math.floor(Math.random() * questions.length)];

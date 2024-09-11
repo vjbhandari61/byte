@@ -1,14 +1,13 @@
 const questionService = require('../services/questionService');
 const teamService = require('../services/teamService');
+const axios = require('axios');
 
 exports.getQuestionsByRound = async (req, res) => {
   try {
     const questions = await questionService.getQuestionsByRound(req.params.round);
-    // Send questions with their IDs
     const questionsWithIds = questions.map(q => ({
       id: q._id,
       question: q.question,
-      // Include other necessary fields, but not the answer
     }));
     res.json(questionsWithIds);
   } catch (error) {
@@ -29,14 +28,11 @@ exports.submitAnswers = async (req, res) => {
         return res.status(400).json({ message: "Invalid answer format" });
       }
       const isCorrect = await questionService.checkAnswer(answer.questionId, answer.answer);
-      console.log(`Round: ${req.body.round}, Question ID: ${answer.questionId}, Answer: ${answer.answer}, Correct: ${isCorrect}`);
       if (isCorrect) {
         score++;
         correctAnswers.push(answer.questionId);
       }
     }
-
-    console.log(`Team: ${req.body.teamName}, Round: ${req.body.round}, Total Score: ${score}`);
 
     const updatedTeam = await teamService.updateScore(req.body.teamName, score, req.body.round);
 
@@ -60,11 +56,9 @@ exports.submitAnswers = async (req, res) => {
 exports.getQuestionByDomain = async (req, res) => {
   try {
     const question = await questionService.getQuestionsByDomain(req.params.domain);
-    // Send question with its ID
     const questionWithId = {
       id: question._id,
       question: question.question,
-      // Include other necessary fields, but not the answer
     };
     res.json(questionWithId);
   } catch (error) {
@@ -73,11 +67,6 @@ exports.getQuestionByDomain = async (req, res) => {
 };
 
 exports.submitCode = async (req, res) => {
-  // Implement code submission logic here
-  res.json({ message: 'Code submission endpoint' });
-};
-
-exports.submitAnswersRound2 = async (req, res) => {
   try {
     const { teamName, questionId, code, language } = req.body;
 
@@ -85,11 +74,10 @@ exports.submitAnswersRound2 = async (req, res) => {
       return res.status(400).json({ message: "Invalid request body format" });
     }
 
-    console.log(`Received submission for team: ${teamName}, question: ${questionId}, language: ${language}`);
+    console.log(`Received code submission for team: ${teamName}, question: ${questionId}, language: ${language}`);
 
     const question = await questionService.getQuestionById(questionId);
     if (!question) {
-      console.log(`Question not found: ${questionId}`);
       return res.status(404).json({ message: "Question not found" });
     }
 
@@ -103,14 +91,12 @@ exports.submitAnswersRound2 = async (req, res) => {
       console.log(`All tests passed. Updating score for team: ${teamName}`);
       updatedTeam = await teamService.updateScore(teamName, scoreIncrement, 2);
       if (!updatedTeam) {
-        console.log(`Team not found: ${teamName}`);
         return res.status(404).json({ message: "Team not found" });
       }
     } else {
       console.log(`Some tests failed. Getting current score for team: ${teamName}`);
       updatedTeam = await teamService.getTeamByName(teamName);
       if (!updatedTeam) {
-        console.log(`Team not found: ${teamName}`);
         return res.status(404).json({ message: "Team not found" });
       }
     }
@@ -127,70 +113,93 @@ exports.submitAnswersRound2 = async (req, res) => {
       message: result.allTestsPassed ? "All test cases passed. Score updated." : "Some test cases failed. No score added."
     });
   } catch (error) {
-    console.error("Error in submitAnswersRound2:", error);
+    console.error("Error in submitCode:", error);
     res.status(500).json({ message: "Error processing code submission: " + error.message });
   }
 };
 
-exports.getAllQuestionsRound1 = async (req, res) => {
-    try {
-        const questions = await questionService.getAllQuestionsRound1();
-        res.json(questions);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+async function runCodeWithPiston(code, language, input) {
+  const pistonUrl = 'https://emkc.org/api/v2/piston/execute';
+  const languageMapping = {
+    'python': 'python3',
+    'javascript': 'node',
+    'java': 'java',
+    'c': 'gcc',
+    'cpp': 'g++'
+  };
+
+  const pistonLanguage = languageMapping[language.toLowerCase()];
+  if (!pistonLanguage) throw new Error('Unsupported language');
+
+  try {
+    const response = await axios.post(pistonUrl, {
+      language: pistonLanguage,
+      source_code: code,
+      stdin: input
+    });
+
+    if (response.data && response.data.run) {
+      return response.data.run.output;
+    } else {
+      throw new Error('Invalid response from Piston API');
     }
+  } catch (error) {
+    console.error("Error calling Piston API:", error);
+    throw new Error('Failed to execute code with Piston API');
+  }
+}
+
+exports.getAllQuestionsRound1 = async (req, res) => {
+  try {
+    const questions = await questionService.getAllQuestionsRound1();
+    res.json(questions);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 exports.getAllQuestionsRound2 = async (req, res) => {
-    try {
-        const questions = await questionService.getAllQuestionsRound2();
-        res.json(questions);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+  try {
+    const questions = await questionService.getAllQuestionsRound2();
+    res.json(questions);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 exports.getRandomQuestionRound3 = async (req, res) => {
-    try {
-        const { domain } = req.query;
-        const question = await questionService.getRandomQuestionRound3(domain);
-        res.json(question);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
-
-exports.submitRound1 = async (req, res) => {
-    // ... existing code ...
-};
-
-exports.submitRound2 = async (req, res) => {
-    // ... existing code ...
+  try {
+    const { domain } = req.query;
+    const question = await questionService.getRandomQuestionRound3(domain);
+    res.json(question);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 exports.updateQuestionsRound1 = async (req, res) => {
-    try {
-        const updatedQuestions = await questionService.updateQuestionsRound1(req.body);
-        res.json(updatedQuestions);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+  try {
+    const updatedQuestions = await questionService.updateQuestionsRound1(req.body);
+    res.json(updatedQuestions);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 exports.updateQuestionsRound2 = async (req, res) => {
-    try {
-        const updatedQuestions = await questionService.updateQuestionsRound2(req.body);
-        res.json(updatedQuestions);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+  try {
+    const updatedQuestions = await questionService.updateQuestionsRound2(req.body);
+    res.json(updatedQuestions);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 exports.updateQuestionsRound3 = async (req, res) => {
-    try {
-        const updatedQuestions = await questionService.updateQuestionsRound3(req.body);
-        res.json(updatedQuestions);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+  try {
+    const updatedQuestions = await questionService.updateQuestionsRound3(req.body);
+    res.json(updatedQuestions);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
