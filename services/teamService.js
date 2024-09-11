@@ -2,8 +2,11 @@ const Team = require('../models/Team');
 const Admin = require('../models/Admin');
 
 exports.createTeam = async (teamName) => {
-  const team = new Team({ teamName });
-  return await team.save();
+  const exists = await Team.findOne({ teamName });
+  if (!exists) {
+    const team = new Team({ teamName });
+    return await team.save();
+  }
 };
 
 exports.getAllTeams = async () => {
