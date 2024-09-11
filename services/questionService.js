@@ -75,12 +75,17 @@ exports.runCodeAndCheckTestCases = async (code, language, testCases) => {
         console.log(`Running test case ${index + 1}`);
         const output = await runCode(filePath, language, testCase.input);
         console.log(`Output: ${output}`);
-        const passed = output.trim() === testCase.output.trim();
+        
+        // Safely trim and compare outputs
+        const trimmedOutput = (output || '').toString().trim();
+        const trimmedExpected = (testCase.output || '').toString().trim();
+        const passed = trimmedOutput === trimmedExpected;
+        
         console.log(`Test case ${index + 1} result: ${passed ? 'Passed' : 'Failed'}`);
         testResults.push({ 
           input: testCase.input, 
-          expected: testCase.output, 
-          actual: output, 
+          expected: trimmedExpected,
+          actual: trimmedOutput, 
           passed 
         });
 
@@ -90,7 +95,7 @@ exports.runCodeAndCheckTestCases = async (code, language, testCases) => {
         allTestsPassed = false;
         testResults.push({ 
           input: testCase.input, 
-          expected: testCase.output, 
+          expected: (testCase.output || '').toString().trim(),
           actual: "Error: " + error.message, 
           passed: false 
         });
