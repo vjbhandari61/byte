@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 
 const adminSchema = new mongoose.Schema({
   username: {
@@ -11,5 +12,9 @@ const adminSchema = new mongoose.Schema({
     required: true
   }
 });
+
+adminSchema.methods.comparePassword = async function(candidatePassword) {
+  return bcrypt.compare(candidatePassword, this.password);
+};
 
 module.exports = mongoose.model('Admin', adminSchema);

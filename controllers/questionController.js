@@ -176,30 +176,3 @@ exports.getRandomQuestionRound3 = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-exports.updateQuestionsRound1 = async (req, res) => {
-  try {
-    const updatedQuestions = await questionService.updateQuestionsRound1(req.body);
-    res.json(updatedQuestions);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-exports.updateQuestionsRound2 = async (req, res) => {
-  try {
-    const updatedQuestions = await questionService.updateQuestionsRound2(req.body);
-    res.json(updatedQuestions);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-exports.updateQuestionsRound3 = async (req, res) => {
-  try {
-    const updatedQuestions = await questionService.updateQuestionsRound3(req.body);
-    res.json(updatedQuestions);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};

@@ -1,4 +1,5 @@
 const Team = require('../models/Team');
+const Admin = require('../models/Admin');
 
 // Remove this line:
 // const bcrypt = require('bcrypt');
@@ -59,15 +60,13 @@ exports.getTeamByName = async (teamName) => {
 };
 
 exports.verifyAdmin = async (username, password) => {
-    const admin = await Team.findOne({ username, password, role: 'admin' });
-    return admin;
+    const admin = await Admin.findOne({ username });
+    if (admin && await admin.comparePassword(password)) {
+        return admin;
+    }
+    return null;
 };
 
-exports.getTeamScores = async () => {
-    return await Team.find({ role: 'team' }).sort({ score: -1 }).select('teamName score');
-};
-
-// Add this new function
 exports.getAdminByUsername = async (username) => {
-    return await Team.findOne({ username, role: 'admin' });
+    return await Admin.findOne({ username });
 };
