@@ -6,6 +6,8 @@ exports.createTeam = async (teamName) => {
   if (!exists) {
     const team = new Team({ teamName });
     return await team.save();
+  } else {
+    throw new Error('Team already exists');
   }
 };
 
