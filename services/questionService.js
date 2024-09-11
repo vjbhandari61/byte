@@ -77,7 +77,7 @@ exports.runCodeAndCheckTestCases = async (code, language, testCases) => {
         console.log(`Output: ${output}`);
         
         // Convert both output and expected output to numbers and compare
-        const numericOutput = Number(output.trim());
+        const numericOutput = Number((output || '').toString().trim());
         const numericExpected = Number(testCase.expectedOutput.trim());
         const passed = !isNaN(numericOutput) && !isNaN(numericExpected) && numericOutput === numericExpected;
         
