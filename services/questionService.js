@@ -99,23 +99,29 @@ exports.runCodeAndCheckTestCases = async (code, language, testCases) => {
   return { allTestsPassed, testResults };
 };
 
-async function runCodeWithPiston(code, language, input) {
+exports.runCodeWithPiston = async (code, language, input) => {
   const pistonUrl = 'https://emkc.org/api/v2/piston/execute';
-  const languageMapping = {
-    'python': 'python',
-    'javascript': 'javascript',
-    'java': 'java',
-    'c': 'c',
-    'cpp': 'cpp'
+  const languageVersions = {
+    'python': '3.10.0',
+    'javascript': '18.15.0',
+    'java': '15.0.2',
+    'c': '10.2.0',
+    'cpp': '10.2.0'
   };
 
-  const pistonLanguage = languageMapping[language.toLowerCase()];
-  if (!pistonLanguage) throw new Error('Unsupported language');
+  const pistonLanguage = language.toLowerCase();
+  if (!languageVersions[pistonLanguage]) throw new Error('Unsupported language');
 
   try {
     const response = await axios.post(pistonUrl, {
       language: pistonLanguage,
-      source_code: code,
+      version: languageVersions[pistonLanguage],
+      files: [
+        {
+          name: `main.${pistonLanguage === 'python' ? 'py' : pistonLanguage === 'javascript' ? 'js' : pistonLanguage}`,
+          content: code
+        }
+      ],
       stdin: input
     });
 
@@ -128,7 +134,7 @@ async function runCodeWithPiston(code, language, input) {
     console.error("Error calling Piston API:", error);
     throw new Error('Failed to execute code with Piston API');
   }
-}
+};
 
 function getFileExtension(language) {
   switch (language.toLowerCase()) {
