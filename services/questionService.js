@@ -74,6 +74,7 @@ exports.runCodeAndCheckTestCases = async (code, language, testCases) => {
       try {
         console.log(`Running test case ${index + 1}`);
         const output = await runCode(filePath, language, testCase.input);
+        console.log(`Output: ${output}`);
         const passed = output.trim() === testCase.output.trim();
         console.log(`Test case ${index + 1} result: ${passed ? 'Passed' : 'Failed'}`);
         testResults.push({ 

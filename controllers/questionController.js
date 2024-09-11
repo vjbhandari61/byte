@@ -89,7 +89,7 @@ exports.submitCode = async (req, res) => {
     if (result.allTestsPassed) {
       scoreIncrement = 1;
       console.log(`All tests passed. Updating score for team: ${teamName}`);
-      updatedTeam = await teamService.updateScore(teamName, scoreIncrement, 2);
+      updatedTeam = await teamService.updateScore(teamName, scoreIncrement);
       if (!updatedTeam) {
         return res.status(404).json({ message: "Team not found" });
       }
