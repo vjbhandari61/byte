@@ -26,22 +26,65 @@ This is a backend API for a quiz application with multiple rounds and team manag
 
 ### Team Routes
 
-- `POST /api/teams/register`: Register a new team
+- `POST /api/teams`: Register a new team
+  Sample input:
+  ```json
+  {
+    "teamName": "Byte-Builders"
+  }
+  ```
+
 - `GET /api/teams`: Get all teams
-- `POST /api/teams`: Create a team
-- `POST /api/teams/login`: Admin login
-- `GET /api/teams/scores`: Get team scores
+
 
 ### Question Routes
-
 - `GET /api/questions/round1`: Get all questions for Round 1
+
 - `GET /api/questions/round2`: Get all questions for Round 2
+
 - `GET /api/questions/round3`: Get a random question for Round 3
-- `POST /api/questions/submit/round1`: Submit answers for Round 1
-- `POST /api/questions/submit/round2`: Submit code for Round 2
-- `PUT /api/questions/update/round1`: Update questions for Round 1
-- `PUT /api/questions/update/round2`: Update questions for Round 2
-- `PUT /api/questions/update/round3`: Update questions for Round 3
+  Query parameter: `domain`
+  Example: `GET /api/questions/round3?domain=algorithms`
+
+
+- `POST /api/questions/submit`: Submit answers for Round 1
+  Sample input:
+  ```json
+  {
+    "teamName": "Byte-Builders",
+    "round": 1,
+    "answers": [
+      {
+        "questionId": "60a1234b5c6d7e8f90123456",
+        "answer": "The correct answer"
+      }
+    ]
+  }
+  ```
+
+- `POST /api/questions/submit-code`: Submit code for Round 2
+  Sample input:
+  ```json
+  {
+    "teamName": "Byte-Builders",
+    "questionId": "60a1234b5c6d7e8f90123457",
+    "code": "function solution(input) { return input; }",
+    "language": "javascript"
+  }
+  ```
+
+
+### Admin Routes
+
+- `POST /api/admin/login`: Admin login
+  Sample input:
+  ```json
+  {
+    "username": "admin",
+    "password": "adminpassword"
+  }
+  ```
+
 
 ## Technologies Used
 
@@ -49,26 +92,20 @@ This is a backend API for a quiz application with multiple rounds and team manag
 - Express.js
 - MongoDB
 - Mongoose
-- CORS
+- Axios (for code execution API)
 
 ## Project Structure
 
 - `server.js`: Main application file
+- `app.js`: Express application setup
 - `routes/`: Contains route definitions
-  - `questionRoutes.js`: Question-related routes
-  - `teamRoutes.js`: Team-related routes
 - `controllers/`: Contains controller logic
-  - `questionController.js`: Handles question-related requests
-  - `teamController.js`: Handles team-related requests
 - `services/`: Contains business logic
-  - `questionService.js`: Question-related business logic
-  - `teamService.js`: Team-related business logic
 - `models/`: Contains database models
-  - `Team.js`: Team model definition
 
 ## Note
 
-This application does not use authentication middleware. Ensure to implement proper authentication and authorization in a production environment.
+This application uses basic authentication for admin routes. Ensure to implement proper authentication and authorization in a production environment.
 
 ## Environment Variables
 
@@ -83,9 +120,4 @@ Make sure to set the following environment variables in your `.env` file:
 ## Running the Application
 
 After setting up the environment variables, you can start the server by running:
-
-```
-node server.js
-```
-
-The server will start and connect to the MongoDB database using the provided credentials.
+- `npm run start`
