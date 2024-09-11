@@ -109,7 +109,6 @@ exports.submitCode = async (req, res) => {
       testResults: result.testResults,
       scoreUpdated: result.allTestsPassed,
       score: updatedTeam.score,
-      roundScore: updatedTeam.roundScores[2] || 0,
       message: result.allTestsPassed ? "All test cases passed. Score updated." : "Some test cases failed. No score added."
     });
   } catch (error) {
