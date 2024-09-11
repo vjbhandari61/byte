@@ -78,7 +78,7 @@ exports.runCodeAndCheckTestCases = async (code, language, testCases) => {
         
         // Safely trim and compare outputs
         const trimmedOutput = (output || '').toString().trim();
-        const trimmedExpected = (testCase.output || '').toString().trim();
+        const trimmedExpected = (testCase.expectedOutput || '').toString().trim();
         const passed = trimmedOutput === trimmedExpected;
         
         console.log(`Test case ${index + 1} result: ${passed ? 'Passed' : 'Failed'}`);
