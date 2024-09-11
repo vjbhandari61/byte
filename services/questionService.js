@@ -102,11 +102,11 @@ exports.runCodeAndCheckTestCases = async (code, language, testCases) => {
 async function runCodeWithPiston(code, language, input) {
   const pistonUrl = 'https://emkc.org/api/v2/piston/execute';
   const languageMapping = {
-    'python': 'python3',
-    'javascript': 'node',
+    'python': 'python',
+    'javascript': 'javascript',
     'java': 'java',
-    'c': 'gcc',
-    'cpp': 'g++'
+    'c': 'c',
+    'cpp': 'cpp'
   };
 
   const pistonLanguage = languageMapping[language.toLowerCase()];
