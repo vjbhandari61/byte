@@ -1,6 +1,7 @@
 const questionService = require('../services/questionService');
 const teamService = require('../services/teamService');
 const axios = require('axios');
+const logger = require('../utils/logger');
 
 exports.getQuestionsByRound = async (req, res) => {
   try {
@@ -11,7 +12,8 @@ exports.getQuestionsByRound = async (req, res) => {
     }));
     res.json(questionsWithIds);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    logger.error('Error in getQuestionsByRound:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -49,8 +51,8 @@ exports.submitAnswers = async (req, res) => {
       message: `Score updated for round ${req.body.round}. You got ${score} correct answers.`
     });
   } catch (error) {
-    console.error("Error in submitAnswers:", error);
-    res.status(500).json({ message: "Error processing answers: " + error.message });
+    logger.error('Error in submitAnswers:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -115,8 +117,8 @@ exports.submitCode = async (req, res) => {
       message: result.allTestsPassed ? "All test cases passed. Score updated." : "Some test cases failed. No score added."
     });
   } catch (error) {
-    console.error("Error in submitCode:", error);
-    res.status(500).json({ message: "Error processing code submission: " + error.message });
+    logger.error('Error in submitCode:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 

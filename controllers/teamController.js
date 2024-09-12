@@ -1,11 +1,13 @@
 const teamService = require('../services/teamService');
+const logger = require('../utils/logger');
 
 exports.createTeam = async (req, res) => {
   try {
     const team = await teamService.createTeam(req.body.teamName);
     res.status(201).json(team);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    logger.error('Error in createTeam:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -39,7 +41,8 @@ exports.adminLogin = async (req, res) => {
             res.status(401).json({ message: 'Invalid credentials' });
         }
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        logger.error('Error in adminLogin:', error);
+        res.status(500).json({ message: 'Internal server error' });
     }
 };
 

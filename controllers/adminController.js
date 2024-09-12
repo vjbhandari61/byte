@@ -1,5 +1,6 @@
 const adminService = require('../services/adminService');
 const jwt = require('jsonwebtoken');
+const logger = require('../utils/logger');
 
 exports.login = async (req, res) => {
   try {
@@ -12,7 +13,8 @@ exports.login = async (req, res) => {
       res.status(401).json({ message: 'Invalid credentials' });
     }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    logger.error('Error in admin login:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -26,7 +28,8 @@ exports.updateQuestions = async (req, res) => {
     const updatedQuestions = await adminService.updateQuestions(round, questions);
     res.json(updatedQuestions);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    logger.error('Error in updateQuestions:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 

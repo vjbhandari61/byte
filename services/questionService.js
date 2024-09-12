@@ -3,12 +3,18 @@ const { exec, spawn } = require('child_process');
 const fs = require('fs').promises;
 const path = require('path');
 const axios = require('axios');
+const logger = require('../utils/logger');
 
 // You might need to install and import a code execution library
 // For example: const { runCode } = require('some-code-execution-library');
 
 exports.getQuestionsByRound = async (round) => {
-  return await Question.find({ round });
+  try {
+    return await Question.find({ round });
+  } catch (error) {
+    logger.error('Error in getQuestionsByRound:', error);
+    throw error;
+  }
 };
 
 exports.getQuestionById = async (questionId) => {
@@ -60,44 +66,49 @@ exports.getQuestionById = async (questionId) => {
 };
 
 exports.runCodeAndCheckTestCases = async (code, language, testCases) => {
-  let allTestsPassed = true;
-  const testResults = [];
+  try {
+    let allTestsPassed = true;
+    const testResults = [];
 
-  for (const [index, testCase] of testCases.entries()) {
-    try {
-      console.log(`Running test case ${index + 1}`);
-      const output = await runCodeWithPiston(code, language, testCase.input);
-      console.log(`Output: ${output}`);
+    for (const [index, testCase] of testCases.entries()) {
+      try {
+        console.log(`Running test case ${index + 1}`);
+        const output = await runCodeWithPiston(code, language, testCase.input);
+        console.log(`Output: ${output}`);
 
-      // Safely handle potentially undefined output and expected output
-      const trimmedOutput = (output || '').toString().trim();
-      const trimmedExpected = (testCase.output || '').toString().trim();
+        // Safely handle potentially undefined output and expected output
+        const trimmedOutput = (output || '').toString().trim();
+        const trimmedExpected = (testCase.output || '').toString().trim();
 
-      const passed = trimmedOutput === trimmedExpected;
+        const passed = trimmedOutput === trimmedExpected;
 
-      console.log(`Test case ${index + 1} result: ${passed ? 'Passed' : 'Failed'}`);
-      testResults.push({
-        input: testCase.input,
-        expected: trimmedExpected,
-        actual: trimmedOutput,
-        passed
-      });
+        console.log(`Test case ${index + 1} result: ${passed ? 'Passed' : 'Failed'}`);
+        testResults.push({
+          input: testCase.input,
+          expected: trimmedExpected,
+          actual: trimmedOutput,
+          passed
+        });
 
-      if (!passed) allTestsPassed = false;
-    } catch (error) {
-      console.error(`Error running test case ${index + 1}:`, error);
-      allTestsPassed = false;
-      testResults.push({
-        input: testCase.input,
-        expected: (testCase.output || '').toString().trim(),
-        actual: "Error: " + error.message,
-        passed: false
-      });
+        if (!passed) allTestsPassed = false;
+      } catch (error) {
+        console.error(`Error running test case ${index + 1}:`, error);
+        allTestsPassed = false;
+        testResults.push({
+          input: testCase.input,
+          expected: (testCase.output || '').toString().trim(),
+          actual: "Error: " + error.message,
+          passed: false
+        });
+      }
     }
-  }
 
-  console.log(`All tests passed: ${allTestsPassed}`);
-  return { allTestsPassed, testResults };
+    console.log(`All tests passed: ${allTestsPassed}`);
+    return { allTestsPassed, testResults };
+  } catch (error) {
+    logger.error('Error in runCodeAndCheckTestCases:', error);
+    throw error;
+  }
 };
 
 const runCodeWithPiston = async (code, language, input) => {

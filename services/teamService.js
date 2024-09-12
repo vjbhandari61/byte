@@ -1,19 +1,30 @@
 const Team = require('../models/Team');
 const Admin = require('../models/Admin');
+const logger = require('../utils/logger');
 
 exports.createTeam = async (teamName) => {
-  const exists = await Team.findOne({ teamName });
-  if (!exists) {
-    console.log(teamName);
-    const team = new Team({ teamName });
-    return await team.save();
-  } else {
-    throw new Error('Team already exists');
+  try {
+    const exists = await Team.findOne({ teamName });
+    if (!exists) {
+      console.log(teamName);
+      const team = new Team({ teamName });
+      return await team.save();
+    } else {
+      throw new Error('Team already exists');
+    }
+  } catch (error) {
+    logger.error('Error in createTeam:', error);
+    throw error;
   }
 };
 
 exports.getAllTeams = async () => {
-  return await Team.find().sort({ score: -1 });
+  try {
+    return await Team.find().sort({ score: -1 });
+  } catch (error) {
+    logger.error('Error in getAllTeams:', error);
+    throw error;
+  }
 };
 
 // exports.updateScore = async (teamName, newScore, round) => {
@@ -63,11 +74,16 @@ exports.getTeamByName = async (teamName) => {
 };
 
 exports.verifyAdmin = async (username, password) => {
+  try {
     const admin = await Admin.findOne({ username });
     if (admin) {
         return admin;
     }
     return null;
+  } catch (error) {
+    logger.error('Error in verifyAdmin:', error);
+    throw error;
+  }
 };
 
 exports.getAdminByUsername = async (username) => {
