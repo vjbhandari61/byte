@@ -219,7 +219,6 @@ function getFileExtension(language) {
 //           resolve(output);
 //         }
 //       });
-//     });
 //   });
 // }
 
@@ -231,9 +230,17 @@ exports.getAllQuestionsRound2 = async () => {
   return await Question.find({ round: 2 });
 };
 
-exports.getRandomQuestionRound3 = async (domain) => {
-  const questions = await Question.find({ round: 3, domain });
-  return questions[Math.floor(Math.random() * questions.length)];
+exports.getRandomQuestionRound3 = async () => {
+  const questions = await Question.aggregate([
+    { $match: { round: 3 } },
+    { $sample: { size: 1 } }
+  ]);
+
+  if (questions.length === 0) {
+    throw new Error('No questions found for round 3');
+  }
+
+  return questions[0];
 };
 
 exports.updateQuestionsRound1 = async (questions) => {

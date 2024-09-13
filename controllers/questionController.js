@@ -142,8 +142,7 @@ exports.getAllQuestionsRound2 = async (req, res) => {
 
 exports.getRandomQuestionRound3 = async (req, res) => {
   try {
-    const { domain } = req.query;
-    const question = await questionService.getRandomQuestionRound3(domain);
+    const question = await questionService.getRandomQuestionRound3();
     res.json(question);
   } catch (error) {
     res.status(500).json({ message: error.message });
