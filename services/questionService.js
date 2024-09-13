@@ -69,12 +69,18 @@ exports.runCodeAndCheckTestCases = async (code, language, testCases) => {
   try {
     let allTestsPassed = true;
     const testResults = [];
+    let timeTaken = 0;  // To calculate total execution time
+    let memoryUsed = 0;  // To calculate memory usage
 
     for (const [index, testCase] of testCases.entries()) {
       try {
         console.log(`Running test case ${index + 1}`);
-        const output = await runCodeWithPiston(code, language, testCase.input);
-        console.log(`Output: ${output}`);
+        const outputDetails = await runCodeWithPiston(code, language, testCase.input);
+        const { output, time, memory } = outputDetails;
+
+        // Accumulate time and memory
+        timeTaken += time;
+        memoryUsed += memory;
 
         // Safely handle potentially undefined output and expected output
         const trimmedOutput = (output || '').toString().trim();
@@ -87,7 +93,9 @@ exports.runCodeAndCheckTestCases = async (code, language, testCases) => {
           input: testCase.input,
           expected: trimmedExpected,
           actual: trimmedOutput,
-          passed
+          passed,
+          time,
+          memory
         });
 
         if (!passed) allTestsPassed = false;
@@ -104,7 +112,7 @@ exports.runCodeAndCheckTestCases = async (code, language, testCases) => {
     }
 
     console.log(`All tests passed: ${allTestsPassed}`);
-    return { allTestsPassed, testResults };
+    return { allTestsPassed, testResults, timeTaken, memoryUsed };
   } catch (error) {
     logger.error('Error in runCodeAndCheckTestCases:', error);
     throw error;
@@ -138,7 +146,8 @@ const runCodeWithPiston = async (code, language, input) => {
     });
 
     if (response.data && response.data.run) {
-      return response.data.run.output;
+      const { output, time, memory } = response.data.run;
+      return { output, time, memory };
     } else {
       throw new Error('Invalid response from Piston API');
     }

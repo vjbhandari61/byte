@@ -20,7 +20,8 @@ exports.createTeam = async (teamName) => {
 
 exports.getAllTeams = async () => {
   try {
-    return await Team.find().sort({ score: -1 });
+    return await Team.find()
+      .sort({ score: -1, updatedAt: 1 });
   } catch (error) {
     logger.error('Error in getAllTeams:', error);
     throw error;
@@ -59,7 +60,10 @@ exports.getAllTeams = async () => {
 exports.updateScore = async (teamName, scoreIncrement) => {
   return await Team.findOneAndUpdate(
     { teamName: teamName },
-    { $inc: { score: scoreIncrement } },
+    { 
+      $inc: { score: scoreIncrement },
+      $set: { updatedAt: new Date() }
+    },
     { new: true }
   );
 };

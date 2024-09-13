@@ -72,10 +72,9 @@ exports.getQuestionByDomain = async (req, res) => {
 exports.submitCode = async (req, res) => {
   try {
     const { teamName, questionId, code, language } = req.body;
-    
+
     if (!teamName || !questionId || !code || !language) {
-      // console.log("Something Went Wrong!")
-      console.log("teamName",teamName,"questionId ",questionId,"code",code,"language",language);
+      console.log("Invalid request body format: ", { teamName, questionId, code, language });
       return res.status(400).json({ message: "Invalid request body format" });
     }
 
@@ -86,40 +85,69 @@ exports.submitCode = async (req, res) => {
       return res.status(404).json({ message: "Question not found" });
     }
 
-    console.log(`Running code and checking test cases for question: ${questionId}`);
+    // Run code and check test cases
     const result = await questionService.runCodeAndCheckTestCases(code, language, question.testCases);
 
     let scoreIncrement = 0;
-    let updatedTeam = null;
-    if (result.allTestsPassed) {
-      scoreIncrement = 1;
+    let efficiencyScore = 0;
+    const totalTests = question.testCases.length;
+    const testsPassed = result.testResults.filter(test => test.passed).length;
+
+    // Award score based on the number of passed tests
+    if (testsPassed === totalTests) {
+      // Full score if all tests pass
+      scoreIncrement = 30;
+      efficiencyScore = calculateEfficiencyScore(result.timeTaken, result.memoryUsed);
       console.log(`All tests passed. Updating score for team: ${teamName}`);
-      updatedTeam = await teamService.updateScore(teamName, scoreIncrement);
-      if (!updatedTeam) {
-        return res.status(404).json({ message: "Team not found" });
-      }
-    } else {
-      console.log(`Some tests failed. Getting current score for team: ${teamName}`);
-      updatedTeam = await teamService.getTeamByName(teamName);
-      if (!updatedTeam) {
-        return res.status(404).json({ message: "Team not found" });
-      }
+    } else if (testsPassed > 0) {
+      // Partial score for partial test passing
+      scoreIncrement = Math.floor((testsPassed / totalTests) * 20);  // Award points based on test completion
+      efficiencyScore = calculateEfficiencyScore(result.timeTaken, result.memoryUsed);
+      console.log(`Partial tests passed. Awarding partial score for team: ${teamName}`);
+    }
+
+    // Update the score with efficiency factored in
+    const totalScoreIncrement = scoreIncrement + efficiencyScore;
+
+    // Update team score
+    let updatedTeam = await teamService.updateScore(teamName, totalScoreIncrement);
+    if (!updatedTeam) {
+      return res.status(404).json({ message: "Team not found" });
     }
 
     console.log(`Sending response for team: ${teamName}`);
     res.json({
       teamName,
       round: 2,
-      allTestsPassed: result.allTestsPassed,
+      allTestsPassed: testsPassed === totalTests,
       testResults: result.testResults,
-      scoreUpdated: result.allTestsPassed,
+      scoreUpdated: testsPassed > 0,
       score: updatedTeam.score,
-      message: result.allTestsPassed ? "All test cases passed. Score updated." : "Some test cases failed. No score added."
+      efficiencyScore,
+      message: testsPassed === totalTests 
+        ? "All test cases passed. Full score awarded."
+        : `Partial success. Awarded ${totalScoreIncrement} points.`
     });
+
   } catch (error) {
     logger.error('Error in submitCode:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
+};
+
+const calculateEfficiencyScore = (timeTaken, memoryUsed) => {
+  let efficiencyScore = 0;
+
+  // Example scoring based on time and memory usage
+  if (timeTaken <= 1000 && memoryUsed <= 64 * 1024) {
+    efficiencyScore = 10; // Full points for high efficiency
+  } else if (timeTaken <= 2000 && memoryUsed <= 128 * 1024) {
+    efficiencyScore = 5; // Partial points for moderate efficiency
+  } else {
+    efficiencyScore = 0; // No points for inefficient code
+  }
+
+  return efficiencyScore;
 };
 
 exports.getAllQuestionsRound1 = async (req, res) => {
