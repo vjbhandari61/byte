@@ -32,5 +32,3 @@ exports.updateQuestions = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
-
-// Add other admin-specific functions here

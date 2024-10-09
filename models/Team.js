@@ -7,7 +7,6 @@ const teamSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now }
 });
 
-// Middleware to update the 'updatedAt' field on save
 teamSchema.pre('save', function(next) {
   this.updatedAt = new Date();
   next();

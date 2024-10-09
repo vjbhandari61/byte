@@ -35,7 +35,6 @@ exports.adminLogin = async (req, res) => {
         const { username, password } = req.body;
         const admin = await teamService.verifyAdmin(username, password);
         if (admin) {
-            // Remove JWT token generation
             res.json({ message: 'Login successful', admin: { id: admin._id, username: admin.username } });
         } else {
             res.status(401).json({ message: 'Invalid credentials' });

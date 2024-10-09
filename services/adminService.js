@@ -10,7 +10,4 @@ exports.verifyAdmin = async (username, password) => {
 };
 
 exports.updateQuestions = async (round, questions) => {
-    // Implement the logic to update questions for a specific round
-    // This might involve bulk operations or individual updates
-    // Return the updated questions
 };

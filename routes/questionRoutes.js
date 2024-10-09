@@ -8,7 +8,6 @@ router.get('/round1', questionController.getAllQuestionsRound1);
 router.get('/round2', questionController.getAllQuestionsRound2);
 router.get('/round3', questionController.getRandomQuestionRound3);
 
-// This line is likely causing the error
 router.post('/submit', questionController.submitAnswers);
 
 router.post('/submit-code', questionController.submitCode);

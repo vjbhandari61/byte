@@ -85,7 +85,6 @@ exports.submitCode = async (req, res) => {
       return res.status(404).json({ message: "Question not found" });
     }
 
-    // Run code and check test cases
     const result = await questionService.runCodeAndCheckTestCases(code, language, question.testCases);
 
     let scoreIncrement = 0;
@@ -93,23 +92,18 @@ exports.submitCode = async (req, res) => {
     const totalTests = question.testCases.length;
     const testsPassed = result.testResults.filter(test => test.passed).length;
 
-    // Award score based on the number of passed tests
     if (testsPassed === totalTests) {
-      // Full score if all tests pass
       scoreIncrement = 30;
       efficiencyScore = calculateEfficiencyScore(result.timeTaken, result.memoryUsed);
       console.log(`All tests passed. Updating score for team: ${teamName}`);
     } else if (testsPassed > 0) {
-      // Partial score for partial test passing
-      scoreIncrement = Math.floor((testsPassed / totalTests) * 20);  // Award points based on test completion
+      scoreIncrement = Math.floor((testsPassed / totalTests) * 20); 
       efficiencyScore = calculateEfficiencyScore(result.timeTaken, result.memoryUsed);
       console.log(`Partial tests passed. Awarding partial score for team: ${teamName}`);
     }
 
-    // Update the score with efficiency factored in
     const totalScoreIncrement = scoreIncrement + efficiencyScore;
 
-    // Update team score
     let updatedTeam = await teamService.updateScore(teamName, totalScoreIncrement);
     if (!updatedTeam) {
       return res.status(404).json({ message: "Team not found" });
@@ -138,13 +132,12 @@ exports.submitCode = async (req, res) => {
 const calculateEfficiencyScore = (timeTaken, memoryUsed) => {
   let efficiencyScore = 0;
 
-  // Example scoring based on time and memory usage
   if (timeTaken <= 1000 && memoryUsed <= 64 * 1024) {
-    efficiencyScore = 10; // Full points for high efficiency
+    efficiencyScore = 10; 
   } else if (timeTaken <= 2000 && memoryUsed <= 128 * 1024) {
-    efficiencyScore = 5; // Partial points for moderate efficiency
+    efficiencyScore = 5; 
   } else {
-    efficiencyScore = 0; // No points for inefficient code
+    efficiencyScore = 0;   
   }
 
   return efficiencyScore;
