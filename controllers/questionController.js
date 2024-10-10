@@ -20,8 +20,18 @@ exports.getQuestionsByRound = async (req, res) => {
 exports.submitAnswers = async (req, res) => {
   try {
     if (!req.body || !req.body.teamName || !Array.isArray(req.body.answers) || !req.body.round) {
-      console.log("SOmething went wrong")
+      console.log("Something went wrong");
       return res.status(400).json({ message: "Invalid request body format" });
+    }
+
+    const team = await teamService.getTeamByName(req.body.teamName);
+    if (!team) {
+      return res.status(404).json({ message: "Team not found" });
+    }
+
+    // Check if the team has already submitted answers for this round
+    if (team.submittedRounds && team.submittedRounds.includes(req.body.round)) {
+      return res.status(400).json({ message: "Answers for this round have already been submitted" });
     }
 
     let score = 0;
@@ -37,7 +47,7 @@ exports.submitAnswers = async (req, res) => {
       }
     }
 
-    const updatedTeam = await teamService.updateScore(req.body.teamName, score);
+    const updatedTeam = await teamService.updateScore(req.body.teamName, score, req.body.round);
 
     if (!updatedTeam) {
       return res.status(404).json({ message: "Team not found" });

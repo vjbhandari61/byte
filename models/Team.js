@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const teamSchema = new mongoose.Schema({
   teamName: { type: String, required: true, unique: true },
   score: { type: Number, default: 0 },
+  submittedRounds: [{ type: Number }],
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });
