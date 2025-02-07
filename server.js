@@ -19,6 +19,10 @@ const questionRoutes = require('./routes/questionRoutes');
 app.use('/api/teams', teamRoutes);
 app.use('/api/questions', questionRoutes);
 
+app.get("/health", async(req, res) => {
+  res.json({message: "Good Health!"}).statusCode(200);
+})
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
