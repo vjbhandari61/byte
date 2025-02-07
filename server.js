@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 3000;
 app.use(bodyParser.json());
 app.use(cors());
 
-mongoose.connect(`mongodb+srv://vjbhandari61:admin@cluster0.ndran.mongodb.net/byte`, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(`mongodb+srv://vjbhandari61:admin@cluster0.bztoz.mongodb.net/byte`, { useNewUrlParser: true, useUnifiedTopology: true });
 
 const teamRoutes = require('./routes/teamRoutes');
 const questionRoutes = require('./routes/questionRoutes');
